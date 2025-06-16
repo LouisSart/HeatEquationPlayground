@@ -61,7 +61,7 @@ def loop(T0, M, rhs, dt, tmax):
     t = 0.0
     i = 1
     while t < tmax:
-        print(i, t, tmax)
+        # print(i, t, tmax)
         T.append(M @ T[i-1] + rhs)
         t += dt
         i += 1
@@ -83,9 +83,10 @@ if __name__ == "__main__":
 
     T = loop(T0, M, rhs, dt, 0.5)
     plt.plot(T0)
-    plt.plot(T[1])
-    plt.plot(T[100])
-    plt.plot(T[500])
-    plt.plot(T[1000])
-    plt.plot(T[10000])
+    plt.plot(T[1], label="t=0")
+    plt.plot(T[100], label=f"t={100*dt}")
+    plt.plot(T[500], label=f"t={500*dt}")
+    plt.plot(T[1000], label=f"t={1000*dt}")
+    plt.plot(T[10000], label=f"t={10000*dt}")
+    plt.legend()
     plt.show()
