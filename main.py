@@ -1,8 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('TkAgg')
-
+from anim import *
 
 def diffusion_matrix(N, left="dirichlet", right="dirichlet"):
     M = np.zeros((N, N), dtype=np.float64)
@@ -50,7 +47,14 @@ def rhs(N, D, dx, dt, left = ("dirichlet", 0), right = ("dirichlet", 0)):
 def initial_condition(N, Tmax):
     T0 = np.zeros(N, dtype=np.float64)
     for k in range(N):
-        T0[k] = Tmax*np.sin(k * np.pi / (N - 1))
+        T0[k] = Tmax * (np.sin(k * np.pi / (N - 1)))
+    return T0
+
+def initial_condition_square(N, Tmax):
+    T0 = np.zeros(N, dtype=np.float64)
+    for k in range(N):
+        if k > N / 3 and k < 2 * N / 3:
+            T0[k] = Tmax
     return T0
 
 def cfl(D, dx):
@@ -61,7 +65,6 @@ def loop(T0, M, rhs, dt, tmax):
     t = 0.0
     i = 1
     while t < tmax:
-        # print(i, t, tmax)
         T.append(M @ T[i-1] + rhs)
         t += dt
         i += 1
@@ -69,11 +72,19 @@ def loop(T0, M, rhs, dt, tmax):
 
 
 if __name__ == "__main__":
+    # Aluminium :
+    lbd = 273 # W.m-1.K-1
+    rho = 2700 # kg.m-3
+    cp = 897 # J.kg-1.K-1
+    D = lbd / (rho * cp) # m2.s-1
+
+    # Space and time discretization
     N = 100
     L = 1.0
     dx = L / (N - 1)
-    D = 1.0
     dt = 0.9 * cfl(D, dx)
+
+    # Boundary conditions
     left = ("neumann", 0.0)
     right = ("neumann", 0.0)
     M = iteration_matrix(N, D, dx, dt, left[0], right[0])
@@ -81,12 +92,7 @@ if __name__ == "__main__":
 
     T0 = initial_condition(N, 30.0)
 
-    T = loop(T0, M, rhs, dt, 0.5)
-    plt.plot(T0)
-    plt.plot(T[1], label="t=0")
-    plt.plot(T[100], label=f"t={100*dt}")
-    plt.plot(T[500], label=f"t={500*dt}")
-    plt.plot(T[1000], label=f"t={1000*dt}")
-    plt.plot(T[10000], label=f"t={10000*dt}")
-    plt.legend()
-    plt.show()
+    T = loop(T0, M, rhs, dt, 300)
+    ani = animate(T, len(T), 200)
+    ani.save(filename="sin_right_neu_left_neu.gif", writer="pillow", fps=30)
+    # plt.show()
